@@ -1,0 +1,268 @@
+# Codemagic CI/CD Configuration for USBett iOS App
+# This configuration builds an iOS app without code signing (development/learning purposes)
+
+workflows:
+  # Development iOS Build (No Apple Developer Account Required)
+  ios-development-build:
+    name: iOS Development Build
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+
+    environment:
+      groups:
+        # You can add environment variable groups here later
+      vars:
+        # Capacitor configuration
+        CAPACITOR_APP_ID: "com.usbett.app"
+        CAPACITOR_APP_NAME: "USBett"
+
+        # Xcode configuration
+        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+
+      # Use latest stable versions
+      xcode: latest
+      node: 16
+
+    # Trigger builds automatically on push to main branch
+    triggering:
+      events:
+        - push
+        - pull_request
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+          source: true
+        - pattern: 'develop'
+          include: true
+          source: true
+      # Allow manual builds from Codemagic UI
+      cancel_previous_builds: true
+
+    scripts:
+      # Step 1: Install dependencies
+      - name: 📦 Install Node dependencies
+        script: |
+          echo "Installing npm dependencies..."
+          npm install
+
+      # Step 2: Build the web application
+      - name: 🏗️ Build web assets
+        script: |
+          echo "Building Vite project..."
+          npm run build
+          echo "✅ Web build complete"
+          ls -la dist/
+
+      # Step 3: Add iOS platform (if not already added)
+      - name: 📱 Add iOS platform
+        script: |
+          echo "Adding iOS platform to Capacitor..."
+          npx cap add ios || echo "iOS platform already exists"
+          echo "✅ iOS platform ready"
+
+      # Step 4: Sync Capacitor
+      - name: 🔄 Sync Capacitor
+        script: |
+          echo "Syncing web assets to iOS..."
+          npx cap sync ios
+          echo "✅ Capacitor sync complete"
+
+      # Step 5: Install CocoaPods dependencies
+      - name: 🍫 Install CocoaPods
+        script: |
+          echo "Installing iOS native dependencies..."
+          cd ios/App
+          pod install
+          cd ../..
+          echo "✅ CocoaPods installed"
+
+      # Step 6: Set up for unsigned build
+      - name: ⚙️ Configure build settings
+        script: |
+          echo "Configuring Xcode project for development build..."
+          # This allows building without code signing
+          # Note: The resulting app won't be installable on real devices
+          cd ios/App
+
+          # Set build number based on build number from Codemagic
+          agvtool new-version -all $BUILD_NUMBER || true
+
+          cd ../..
+          echo "✅ Build configuration complete"
+
+      # Step 7: Build iOS archive (unsigned)
+        # Note: Without proper code signing, this creates an archive but not an installable IPA
+      - name: 🔨 Build iOS archive
+        script: |
+          echo "Building iOS application..."
+
+          # Build the app without code signing
+          xcodebuild archive \
+            -workspace "$XCODE_WORKSPACE" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Debug \
+            -archivePath build/App.xcarchive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            -allowProvisioningUpdates
+
+          echo "✅ iOS archive built successfully"
+          ls -la build/
+
+      # Step 8: Create app bundle (alternative to IPA for learning)
+      - name: 📦 Extract app bundle
+        script: |
+          echo "Extracting .app bundle from archive..."
+
+          # Extract the .app bundle for examination
+          cp -r build/App.xcarchive/Products/Applications/App.app build/USBett.app
+
+          # Create a zip for easier download
+          cd build
+          zip -r USBett-app.zip USBett.app
+          cd ..
+
+          echo "✅ App bundle extracted"
+          echo "Note: This is NOT an installable IPA - it's for learning/inspection only"
+
+    # Define build artifacts to save
+    artifacts:
+      - build/App.xcarchive/**/*
+      - build/USBett.app/**/*
+      - build/USBett-app.zip
+      - ios/App/Pods/**/*.log
+
+    # Publishing/Notifications
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com  # Replace with your email
+        notify:
+          success: true
+          failure: true
+
+      # Slack notifications (optional - configure in Codemagic UI)
+      # slack:
+      #   channel: '#builds'
+      #   notify_on_build_start: true
+
+# =============================================================================
+# SIGNED BUILD WORKFLOW (Requires Apple Developer Account - $99/year)
+# Uncomment and configure this when you're ready for production builds
+# =============================================================================
+
+  # ios-production-build:
+  #   name: iOS Production Build (Signed)
+  #   max_build_duration: 60
+  #   instance_type: mac_mini_m1
+  #
+  #   environment:
+  #     groups:
+  #       - app_store_credentials  # Create this in Codemagic UI
+  #     vars:
+  #       XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+  #       XCODE_SCHEME: "App"
+  #     xcode: latest
+  #     node: 16
+  #     ios_signing:
+  #       distribution_type: app_store  # or: ad_hoc, enterprise, development
+  #       bundle_identifier: com.usbett.app
+  #
+  #   scripts:
+  #     - name: Install dependencies
+  #       script: npm install
+  #
+  #     - name: Build web assets
+  #       script: npm run build
+  #
+  #     - name: Add iOS platform
+  #       script: npx cap add ios || echo "Already exists"
+  #
+  #     - name: Sync Capacitor
+  #       script: npx cap sync ios
+  #
+  #     - name: Install CocoaPods
+  #       script: |
+  #         cd ios/App
+  #         pod install
+  #         cd ../..
+  #
+  #     - name: Set up code signing
+  #       script: |
+  #         keychain initialize
+  #         app-store-connect fetch-signing-files "$BUNDLE_ID" \
+  #           --type APP_STORE \
+  #           --create
+  #         keychain add-certificates
+  #         xcode-project use-profiles
+  #
+  #     - name: Build IPA
+  #       script: |
+  #         xcode-project build-ipa \
+  #           --workspace "$XCODE_WORKSPACE" \
+  #           --scheme "$XCODE_SCHEME"
+  #
+  #   artifacts:
+  #     - build/ios/ipa/*.ipa
+  #     - /tmp/xcodebuild_logs/*.log
+  #
+  #   publishing:
+  #     email:
+  #       recipients:
+  #         - your-email@example.com
+  #
+  #     # Automatically upload to TestFlight
+  #     app_store_connect:
+  #       auth: integration  # Configure in Codemagic UI
+  #       submit_to_testflight: true
+  #       beta_groups:
+  #         - Internal Testers
+
+# =============================================================================
+# NOTES AND DOCUMENTATION
+# =============================================================================
+#
+# WHAT THIS BUILD PRODUCES:
+# - An unsigned .xcarchive file (the built app archive)
+# - A .app bundle (the actual application, but not installable)
+# - A zip file for easy download and inspection
+#
+# LIMITATIONS OF UNSIGNED BUILDS:
+# - Cannot install on real iOS devices
+# - Cannot submit to App Store
+# - Cannot distribute via TestFlight
+# - Can only be run in iOS Simulator
+#
+# TO UPGRADE TO SIGNED BUILDS:
+# 1. Enroll in Apple Developer Program ($99/year)
+#    https://developer.apple.com/programs/
+#
+# 2. Create App Store Connect API Key:
+#    - Go to https://appstoreconnect.apple.com
+#    - Users and Access > Keys
+#    - Create new key with "App Manager" role
+#    - Download the .p8 file (ONE TIME ONLY!)
+#
+# 3. Add credentials to Codemagic:
+#    - Go to your app in Codemagic
+#    - Settings > Environment variables
+#    - Add App Store Connect integration
+#    - Upload the .p8 key file
+#
+# 4. Uncomment the "ios-production-build" workflow above
+#
+# 5. Update the workflow to use your bundle ID and signing settings
+#
+# HELPFUL COMMANDS (run locally on Mac):
+# - npm run sync:ios       # Sync web assets to iOS
+# - npm run open:ios       # Open project in Xcode
+# - npm run build          # Build web assets only
+#
+# CODEMAGIC RESOURCES:
+# - Docs: https://docs.codemagic.io/yaml-quick-start/building-a-native-ios-app/
+# - Capacitor Guide: https://docs.codemagic.io/yaml-running-builds/building-capacitor-projects/
+# - Code Signing: https://docs.codemagic.io/yaml-code-signing/signing-ios/
+#
+# =============================================================================
