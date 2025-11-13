@@ -43,6 +43,10 @@ workflows:
         script: |
           echo "Installing npm dependencies..."
           npm install
+          echo "Node version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+          echo "Capacitor CLI version:"
+          npx cap --version
 
       # Step 2: Build the web application
       - name: 🏗️ Build web assets
@@ -50,13 +54,32 @@ workflows:
           echo "Building Vite project..."
           npm run build
           echo "✅ Web build complete"
+          echo "Checking dist folder:"
           ls -la dist/
+          echo "Dist contents:"
+          ls -la dist/ || echo "No dist folder!"
 
-      # Step 3: Add iOS platform (if not already added)
+      # Step 3: Add iOS platform
       - name: 📱 Add iOS platform
         script: |
+          echo "Current directory: $(pwd)"
+          echo "Checking for existing iOS platform..."
+          if [ -d "ios" ]; then
+            echo "iOS platform already exists, removing it..."
+            rm -rf ios
+          fi
+
           echo "Adding iOS platform to Capacitor..."
-          npx cap add ios || echo "iOS platform already exists"
+          npx cap add ios
+
+          echo "Verifying iOS platform was created..."
+          if [ ! -d "ios" ]; then
+            echo "ERROR: iOS platform was not created!"
+            exit 1
+          fi
+
+          echo "iOS folder structure:"
+          ls -la ios/
           echo "✅ iOS platform ready"
 
       # Step 4: Sync Capacitor
@@ -64,14 +87,40 @@ workflows:
         script: |
           echo "Syncing web assets to iOS..."
           npx cap sync ios
+
+          echo "Verifying sync completed..."
+          if [ ! -d "ios/App" ]; then
+            echo "ERROR: ios/App directory not found!"
+            exit 1
+          fi
+
+          echo "iOS App folder structure:"
+          ls -la ios/App/
           echo "✅ Capacitor sync complete"
 
       # Step 5: Install CocoaPods dependencies
       - name: 🍫 Install CocoaPods
         script: |
+          echo "CocoaPods version:"
+          pod --version
+
           echo "Installing iOS native dependencies..."
           cd ios/App
+
+          echo "Podfile contents:"
+          cat Podfile
+
           pod install
+
+          echo "Verifying workspace was created..."
+          if [ ! -d "App.xcworkspace" ]; then
+            echo "ERROR: Workspace not created!"
+            ls -la
+            exit 1
+          fi
+
+          echo "Workspace structure:"
+          ls -la App.xcworkspace/
           cd ../..
           echo "✅ CocoaPods installed"
 
@@ -94,6 +143,25 @@ workflows:
       - name: 🔨 Build iOS archive
         script: |
           echo "Building iOS application..."
+          echo "Current directory: $(pwd)"
+
+          # Verify workspace exists
+          echo "Checking for workspace at: ios/App/App.xcworkspace"
+          if [ ! -d "ios/App/App.xcworkspace" ]; then
+            echo "ERROR: Workspace not found!"
+            echo "Contents of ios/:"
+            ls -la ios/
+            echo "Contents of ios/App/:"
+            ls -la ios/App/
+            exit 1
+          fi
+
+          echo "Workspace found! Starting build..."
+          echo "Workspace path: $XCODE_WORKSPACE"
+          echo "Scheme: $XCODE_SCHEME"
+
+          # Create build directory
+          mkdir -p build
 
           # Build the app without code signing
           xcodebuild archive \
@@ -107,6 +175,7 @@ workflows:
             -allowProvisioningUpdates
 
           echo "✅ iOS archive built successfully"
+          echo "Build directory contents:"
           ls -la build/
 
       # Step 8: Create app bundle (alternative to IPA for learning)
@@ -114,15 +183,36 @@ workflows:
         script: |
           echo "Extracting .app bundle from archive..."
 
+          # Verify archive exists
+          if [ ! -d "build/App.xcarchive" ]; then
+            echo "ERROR: Archive not found!"
+            echo "Build directory contents:"
+            ls -la build/
+            exit 1
+          fi
+
+          echo "Archive structure:"
+          ls -la build/App.xcarchive/
+
           # Extract the .app bundle for examination
-          cp -r build/App.xcarchive/Products/Applications/App.app build/USBett.app
+          if [ -d "build/App.xcarchive/Products/Applications/App.app" ]; then
+            cp -r build/App.xcarchive/Products/Applications/App.app build/USBett.app
 
-          # Create a zip for easier download
-          cd build
-          zip -r USBett-app.zip USBett.app
-          cd ..
+            # Create a zip for easier download
+            cd build
+            zip -r USBett-app.zip USBett.app
+            cd ..
 
-          echo "✅ App bundle extracted"
+            echo "✅ App bundle extracted"
+            echo "Final build artifacts:"
+            ls -la build/
+          else
+            echo "ERROR: App.app not found in archive!"
+            echo "Archive Products structure:"
+            ls -la build/App.xcarchive/Products/ || echo "Products folder not found"
+            exit 1
+          fi
+
           echo "Note: This is NOT an installable IPA - it's for learning/inspection only"
 
     # Define build artifacts to save
