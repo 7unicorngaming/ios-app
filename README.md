@@ -1,274 +1,243 @@
-# USBett Mobile App 📱
+# 📱 iOS App - USBett Mobile
 
-A mobile application wrapper for [usbett.com](https://www.usbets.com) built with Capacitor. This app provides a native mobile experience for accessing legal US online casinos, sports betting information, and gambling guides.
+[![Codemagic build status](https://api.codemagic.io/apps/YOUR_APP_ID/YOUR_WORKFLOW_ID/status_badge.svg)](https://codemagic.io/apps/YOUR_APP_ID/YOUR_WORKFLOW_ID/latest_build)
 
-## 🎯 Features
+USBett mobile application built with Capacitor. Build iOS apps from Linux using Codemagic cloud infrastructure!
 
-- **Native Mobile Wrapper**: Wraps the USBett website in a native mobile app
-- **Cross-Platform**: Works on both iOS and Android
-- **Splash Screen**: Custom branded splash screen
-- **Status Bar Styling**: Native status bar integration
-- **Back Button Handling**: Native Android back button support
-- **Offline Detection**: Shows error screen when offline
-- **Loading States**: Professional loading and error states
+## 🚀 Quick Start
 
-## 📋 Prerequisites
+### Prerequisites
+- Node.js 16+ installed
+- Git configured
+- Codemagic account (free tier available)
 
-Before you begin, ensure you have the following installed:
-
-- **Node.js** (v16 or higher) - [Download](https://nodejs.org/)
-- **npm** or **yarn** - Comes with Node.js
-- **Android Studio** (for Android development) - [Download](https://developer.android.com/studio)
-- **Xcode** (for iOS development, macOS only) - [Download](https://developer.apple.com/xcode/)
-
-## 🚀 Getting Started
-
-### 1. Install Dependencies
-
+### Local Development
 ```bash
+# Install dependencies
 npm install
-```
 
-### 2. Build the Web Assets
-
-```bash
+# Build web assets
 npm run build
-```
 
-### 3. Add Platforms
-
-#### For Android:
-```bash
-npm run add:android
-```
-
-#### For iOS (macOS only):
-```bash
-npm run add:ios
-```
-
-### 4. Sync Capacitor
-
-After adding platforms, sync the web assets with the native projects:
-
-```bash
+# Sync with Capacitor
 npm run sync
 ```
 
-## 🛠️ Development
+### Build iOS on Codemagic (No Mac Needed!)
 
-### Run in Browser (Development Mode)
+1. **Sign up for Codemagic**: https://codemagic.io
+2. **Add this repository** to Codemagic
+3. **Select workflow**: `ios-development-build`
+4. **Click "Start build"**
+5. **Download artifacts** (~10-15 minutes)
 
-```bash
-npm run dev
+📖 **Detailed Guide**: See [BUILD_IOS.md](BUILD_IOS.md)
+
+## 📦 What's Included
+
+### Configuration Files
+- **`codemagic.yaml`** - Automated iOS build pipeline
+- **`capacitor.config.ts`** - Capacitor configuration
+- **`package.json`** - Dependencies and scripts
+- **`vite.config.js`** - Vite build configuration
+
+### Documentation
+- **`BUILD_IOS.md`** - Quick start guide (5 minutes)
+- **`IOS_BUILD_GUIDE.md`** - Complete comprehensive guide
+- **`IOS_SETUP_COMPLETE.md`** - Setup summary and upgrade path
+- **`README_IOS_BUILD.md`** - Quick reference
+
+### App Structure
 ```
-
-This will start a development server at `http://localhost:3000`
-
-### Build for Production
-
-```bash
-npm run build
-```
-
-### Sync Changes to Native Projects
-
-After making changes to the web assets:
-
-```bash
-npm run sync
-```
-
-Or sync specific platforms:
-
-```bash
-npm run sync:android
-npm run sync:ios
-```
-
-## 📱 Building Native Apps
-
-### Android
-
-1. Open Android Studio:
-```bash
-npm run open:android
-```
-
-2. In Android Studio:
-   - Wait for Gradle sync to complete
-   - Connect an Android device or start an emulator
-   - Click the "Run" button (green play icon)
-
-3. Build APK/AAB:
-   - Go to **Build → Build Bundle(s) / APK(s)**
-   - Choose **Build APK(s)** for testing or **Build Bundle** for Play Store
-
-### iOS (macOS only)
-
-1. Open Xcode:
-```bash
-npm run open:ios
-```
-
-2. In Xcode:
-   - Select your development team in Signing & Capabilities
-   - Choose a target device or simulator
-   - Click the "Play" button to run
-
-3. Build for App Store:
-   - Go to **Product → Archive**
-   - Follow the prompts to upload to App Store Connect
-
-## 📁 Project Structure
-
-```
-usbett/
-├── android/              # Android native project
-├── ios/                  # iOS native project
+ios-app/
+├── android/              # Android platform (ready)
+├── src/                  # Web app source
+├── public/               # Static assets
+├── resources/            # App icons & splash screens
 ├── dist/                 # Built web assets (generated)
-├── src/
-│   └── main.js          # Main JavaScript with Capacitor logic
-├── resources/           # App icons and splash screens
-├── public/              # Static assets
-├── index.html           # Main HTML file with WebView
-├── capacitor.config.ts  # Capacitor configuration
-├── vite.config.js       # Vite build configuration
-└── package.json         # Project dependencies
+├── codemagic.yaml        # CI/CD configuration
+├── capacitor.config.ts   # Capacitor settings
+└── Documentation files   # Complete guides
 ```
 
-## 🎨 Customization
+## 🎯 Current Build Type
 
-### Change Website URL
+**Development/Learning Build** (No Apple Developer Account Required)
 
-Edit `src/main.js` and update the `WEBSITE_URL` constant:
+### Can Do:
+- ✅ Learn iOS build process
+- ✅ Test CI/CD pipeline
+- ✅ Inspect app structure
+- ✅ Verify compilation
 
-```javascript
-const WEBSITE_URL = 'https://www.usbets.com';
-```
+### Cannot Do (Yet):
+- ❌ Install on real devices
+- ❌ Submit to App Store
+- ❌ TestFlight distribution
 
-### Update App Name and Package ID
+**Why?** Unsigned builds are for learning. For production, you'll need an [Apple Developer account](https://developer.apple.com/programs/) ($99/year).
 
-Edit `capacitor.config.ts`:
-
-```typescript
-const config: CapacitorConfig = {
-  appId: 'com.usbett.app',     // Change this
-  appName: 'USBett',            // Change this
-  webDir: 'dist'
-};
-```
-
-### Customize Colors
-
-Edit `index.html` to change:
-- Loading screen colors
-- Status bar color (also in `capacitor.config.ts`)
-- Theme color in meta tag
-
-## 🖼️ App Icons & Splash Screen
-
-### Generate Icons
-
-1. Place your app icon (1024x1024 PNG) in `resources/icon.png`
-2. Place your splash screen (2732x2732 PNG) in `resources/splash.png`
-
-3. Generate platform-specific assets:
+## 🔧 Available Scripts
 
 ```bash
-npx capacitor-assets generate
+# Development
+npm run dev              # Start Vite dev server
+npm run build            # Build web assets
+
+# Capacitor
+npm run sync             # Sync all platforms
+npm run sync:ios         # Sync iOS only
+npm run sync:android     # Sync Android only
+npm run add:ios          # Add iOS platform (requires Mac)
+npm run add:android      # Add Android platform
 ```
 
-Or install the tool first:
-```bash
-npm install -g @capacitor/assets
-capacitor-assets generate
-```
+## 📱 App Information
 
-### Manual Icon Setup
+- **App Name**: USBett
+- **Bundle ID**: com.usbett.app
+- **Platforms**: iOS, Android
+- **Framework**: Capacitor 6.2.0
+- **Build Tool**: Vite 5.4.21
 
-Place your icons in:
-- **Android**: `android/app/src/main/res/`
-- **iOS**: `ios/App/App/Assets.xcassets/`
+## 🏗️ Build Process
 
-## 🔧 Troubleshooting
+The automated build pipeline:
 
-### Issue: "Cleartext HTTP traffic not permitted"
+1. 📦 Install Node dependencies
+2. 🏗️ Build web app (Vite)
+3. 📱 Add iOS platform
+4. 🔄 Sync Capacitor
+5. 🍫 Install CocoaPods
+6. 🔨 Build iOS archive
+7. 📦 Package artifacts
 
-**Solution**: The app is configured to allow HTTPS. If you need HTTP, update `capacitor.config.ts`:
+**Duration**: ~10-15 minutes per build
 
-```typescript
-android: {
-  allowMixedContent: true,
-}
-```
+## 💰 Cost
 
-### Issue: Iframe not loading on iOS
+### Current Setup: **FREE**
+- Codemagic free tier: 500 minutes/month
+- ~30-50 builds per month
+- No credit card required
 
-**Solution**: Check that the website allows embedding. Some sites block iframes with X-Frame-Options headers.
+### Production (Future):
+- Apple Developer: $99/year
+- Codemagic Pro: ~$3-10/month
 
-### Issue: Back button not working
+## 🎓 Learning Path
 
-**Solution**: Make sure the App plugin is properly initialized in `src/main.js`
+1. **Start Here**: Read [BUILD_IOS.md](BUILD_IOS.md)
+2. **Deep Dive**: Read [IOS_BUILD_GUIDE.md](IOS_BUILD_GUIDE.md)
+3. **First Build**: Set up Codemagic
+4. **Explore**: Download and inspect artifacts
+5. **Production**: Upgrade when ready
 
-### Issue: App crashes on Android
+## 📚 Documentation
 
-**Solution**: Check Android Studio Logcat for errors. Common issues:
-- Gradle sync failures
-- Missing permissions in AndroidManifest.xml
-- WebView compatibility issues
+| File | Purpose |
+|------|---------|
+| [BUILD_IOS.md](BUILD_IOS.md) | 5-minute quick start |
+| [IOS_BUILD_GUIDE.md](IOS_BUILD_GUIDE.md) | Complete guide with troubleshooting |
+| [IOS_SETUP_COMPLETE.md](IOS_SETUP_COMPLETE.md) | Setup summary & checklist |
+| [README_IOS_BUILD.md](README_IOS_BUILD.md) | Quick reference |
 
-## 📦 Available Scripts
+## 🔄 CI/CD with Codemagic
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build web assets |
-| `npm run preview` | Preview production build |
-| `npm run sync` | Sync web assets to native projects |
-| `npm run sync:android` | Sync to Android only |
-| `npm run sync:ios` | Sync to iOS only |
-| `npm run add:android` | Add Android platform |
-| `npm run add:ios` | Add iOS platform |
-| `npm run open:android` | Open Android Studio |
-| `npm run open:ios` | Open Xcode |
-| `npm run copy` | Copy web assets to native projects |
-| `npm run update` | Update Capacitor dependencies |
+This project uses Codemagic for automated iOS builds:
 
-## 🔐 Security Considerations
+- **Trigger**: Push to `main` or `develop` branch
+- **Build Time**: ~10-15 minutes
+- **Artifacts**: `.xcarchive`, `.app` bundle, `.zip`
+- **Notifications**: Email on success/failure
 
-- The iframe uses `sandbox` attribute for security
-- HTTPS is enforced by default
-- External links open in system browser
-- No sensitive data is stored locally
+### Workflows Available:
+1. **`ios-development-build`** - Current (no signing)
+2. **`ios-production-build`** - Template for future (requires Apple Developer account)
+
+## 🚀 Upgrade to Production
+
+Ready for App Store distribution? Follow these steps:
+
+1. **Get Apple Developer Account** ($99/year)
+   - Enroll at https://developer.apple.com/programs/
+
+2. **Create App Store Connect API Key**
+   - Download `.p8` key file
+   - Save Key ID and Issuer ID
+
+3. **Configure Codemagic**
+   - Add API key integration
+   - Update `codemagic.yaml`
+
+4. **Build Signed IPA**
+   - Use production workflow
+   - Distribute via TestFlight
+   - Submit to App Store
+
+📖 **Full Instructions**: See [IOS_BUILD_GUIDE.md](IOS_BUILD_GUIDE.md#upgrade-to-production)
+
+## 🐛 Troubleshooting
+
+### Build fails on Codemagic
+- Check build logs for specific errors
+- Verify `npm run build` works locally
+- See [IOS_BUILD_GUIDE.md](IOS_BUILD_GUIDE.md#troubleshooting) for solutions
+
+### Can't find build artifacts
+- Build must complete successfully first
+- Go to build details → Artifacts section
+- Files expire after 30 days
+
+### Out of build minutes
+- Free tier: 500 minutes/month
+- Resets monthly
+- Consider upgrading if needed
+
+## 🔗 Resources
+
+- **Codemagic**: https://codemagic.io
+- **Codemagic Docs**: https://docs.codemagic.io
+- **Capacitor Docs**: https://capacitorjs.com/docs
+- **Apple Developer**: https://developer.apple.com
+- **Vite**: https://vitejs.dev
 
 ## 📄 License
 
 ISC
 
-## 🤝 Contributing
+## 👥 Author
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📞 Support
-
-For issues related to:
-- **USBett Website**: Visit [www.usbets.com](https://www.usbets.com)
-- **Capacitor**: [Capacitor Documentation](https://capacitorjs.com/docs)
-- **This App**: Open an issue in this repository
-
-## 🌟 Resources
-
-- [Capacitor Documentation](https://capacitorjs.com/docs)
-- [Capacitor Plugins](https://capacitorjs.com/docs/plugins)
-- [Android Development](https://developer.android.com/)
-- [iOS Development](https://developer.apple.com/)
-- [Vite Documentation](https://vitejs.dev/)
+**7unicorngaming**
+- GitHub: [@7unicorngaming](https://github.com/7unicorngaming)
+- Website: https://7unicorngaming.com
+- Email: 7unicorngaming@gmail.com
 
 ---
 
-**Built with ❤️ using Capacitor**
+## ✨ Features
+
+- 🌐 Web-based mobile app (Capacitor)
+- 📱 iOS build pipeline (Codemagic)
+- 🤖 Android support included
+- 📦 Automated builds on push
+- 📧 Email notifications
+- 🔄 Hot reload in development
+- 🎨 Custom splash screens
+- 🔔 Status bar configuration
+
+---
+
+## 🎉 Get Started Now!
+
+1. Clone this repository
+2. Read [BUILD_IOS.md](BUILD_IOS.md)
+3. Sign up for Codemagic
+4. Start your first build
+5. Download and explore!
+
+**Build iOS apps from Linux! 🚀**
+
+---
+
+Built with ❤️ using Capacitor + Codemagic + Vite
