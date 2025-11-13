@@ -20,7 +20,7 @@ workflows:
 
       # Use latest stable versions
       xcode: latest
-      node: 16
+      node: 18
 
     # Trigger builds automatically on push to main branch
     triggering:
@@ -160,7 +160,7 @@ workflows:
 #       XCODE_WORKSPACE: "ios/App/App.xcworkspace"
 #       XCODE_SCHEME: "App"
 #     xcode: latest
-#     node: 16
+#     node: 18
 #     ios_signing:
 #       distribution_type: app_store  # or: ad_hoc, enterprise, development
 #       bundle_identifier: com.usbett.app
